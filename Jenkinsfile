@@ -47,10 +47,9 @@ pipeline {
         }
 
         stage('Deploy to k3s') {
-            steps {
-                sh 'kubectl set image deployment/my-web-app my-devops-app=$IMAGE'
-                sh 'kubectl rollout status deployment/my-web-app'
-            }
-        }
+    steps {
+        sh 'kubectl set image deployment/my-web-app my-web-app=rahuljr08/my-devops-app:latest'
+             }
+         } 
     }
 }
