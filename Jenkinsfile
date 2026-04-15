@@ -48,11 +48,13 @@ pipeline {
             }
         }
 
-        stage('Deploy to k3s') {
+        stage('Deploy Kubernetes (Apply YAMLs)') {
             steps {
                 sh '''
-                    echo "Checking deployment..."
-                    kubectl get deployment $DEPLOYMENT -n $KUBE_NAMESPACE
+                    echo "Applying Deployment & Service YAML..."
+
+                    kubectl apply -f deployment.yaml -n $KUBE_NAMESPACE
+                    kubectl apply -f service.yaml -n $KUBE_NAMESPACE
 
                     echo "Updating image..."
                     kubectl set image deployment/$DEPLOYMENT \
@@ -63,6 +65,27 @@ pipeline {
                     kubectl rollout status deployment/$DEPLOYMENT -n $KUBE_NAMESPACE
                 '''
             }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    echo "Pods:"
+                    kubectl get pods -n $KUBE_NAMESPACE
+
+                    echo "Services:"
+                    kubectl get svc -n $KUBE_NAMESPACE
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment SUCCESS"
+        }
+        failure {
+            echo "❌ Deployment FAILED"
         }
     }
 }
