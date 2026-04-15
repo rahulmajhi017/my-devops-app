@@ -3,13 +3,16 @@ pipeline {
 
     environment {
         IMAGE = "rahuljr08/my-devops-app:latest"
+        DOCKER_USER = "rahuljr08"
     }
 
     stages {
 
-        stage('Test Docker') {
+        stage('Test Tools') {
             steps {
                 sh 'docker --version'
+                sh 'git --version'
+                sh 'kubectl version --client || true'
             }
         }
 
@@ -26,11 +29,15 @@ pipeline {
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                sh 'echo "YOUR_DOCKER_PASSWORD" | docker login -u $DOCKER_USER --password-stdin'
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-cred', url: '']) {
-                    sh 'docker push $IMAGE'
-                }
+                sh 'docker push $IMAGE'
             }
         }
 
