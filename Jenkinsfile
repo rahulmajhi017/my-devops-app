@@ -4,6 +4,9 @@ pipeline {
     environment {
         IMAGE = "rahuljr08/my-devops-app:latest"
         DOCKER_USER = "rahuljr08"
+        KUBE_NAMESPACE = "default"
+        DEPLOYMENT = "my-web-app"
+        CONTAINER = "my-web-app"
     }
 
     stages {
@@ -19,7 +22,7 @@ pipeline {
         stage('Clone Code') {
             steps {
                 git branch: 'master',
-                    url: 'https://github.com/rahulmajhi017/my-devops-app.git'
+                url: 'https://github.com/rahulmajhi017/my-devops-app.git'
             }
         }
 
@@ -29,11 +32,10 @@ pipeline {
             }
         }
 
-        stage('Docker Login (FIXED)') {
+        stage('Docker Login') {
             steps {
                 withCredentials([string(credentialsId: 'docker-token', variable: 'DOCKER_TOKEN')]) {
                     sh '''
-                        docker logout || true
                         echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USER --password-stdin
                     '''
                 }
@@ -47,9 +49,20 @@ pipeline {
         }
 
         stage('Deploy to k3s') {
-    steps {
-        sh 'kubectl set image deployment/my-web-app my-web-app=rahuljr08/my-devops-app:latest'
-             }
-         } 
+            steps {
+                sh '''
+                    echo "Checking deployment..."
+                    kubectl get deployment $DEPLOYMENT -n $KUBE_NAMESPACE
+
+                    echo "Updating image..."
+                    kubectl set image deployment/$DEPLOYMENT \
+                        $CONTAINER=$IMAGE \
+                        -n $KUBE_NAMESPACE
+
+                    echo "Waiting for rollout..."
+                    kubectl rollout status deployment/$DEPLOYMENT -n $KUBE_NAMESPACE
+                '''
+            }
+        }
     }
 }
