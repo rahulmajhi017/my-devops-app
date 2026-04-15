@@ -7,18 +7,16 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git branch: 'master',
-                    url: 'https://github.com/rahulmajhi017/my-devops-app.git'
-            }
-        }
-         
-    stages {
-
         stage('Test Docker') {
             steps {
                 sh 'docker --version'
+            }
+        }
+
+        stage('Clone Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/rahulmajhi017/my-devops-app.git'
             }
         }
 
