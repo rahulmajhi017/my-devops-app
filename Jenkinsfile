@@ -29,10 +29,11 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Docker Login (FIXED)') {
             steps {
                 withCredentials([string(credentialsId: 'docker-token', variable: 'DOCKER_TOKEN')]) {
                     sh '''
+                        docker logout || true
                         echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USER --password-stdin
                     '''
                 }
