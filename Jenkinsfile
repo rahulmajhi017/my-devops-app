@@ -13,6 +13,14 @@ pipeline {
                     url: 'https://github.com/rahulmajhi017/my-devops-app.git'
             }
         }
+         
+    stages {
+
+        stage('Test Docker') {
+            steps {
+                sh 'docker --version'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
